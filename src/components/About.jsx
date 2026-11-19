@@ -1,4 +1,5 @@
 import Reveal from './Reveal'
+import Icon from './Icons'
 import { usePortfolioData } from '../lib/usePortfolioData'
 import { fallbackProfile } from '../lib/fallbackData'
 
@@ -15,12 +16,6 @@ const capabilities = [
   'CI/CD pipelines',
 ]
 
-const workPreview = [
-  { id: 1, name: 'E-commerce', image: '/projects/ecommerce.jpg' },
-  { id: 2, name: 'Expert Dentrix API', image: '/projects/dentrix-api.jpg' },
-  { id: 3, name: 'Managed Cloud', image: '/projects/hosting-deployment.jpg' },
-]
-
 export default function About() {
   const { data: profile } = usePortfolioData('profile', fallbackProfile)
   const alias = profile?.alias || 'M4STER'
@@ -29,7 +24,7 @@ export default function About() {
     <section className="section" id="about">
       <Reveal>
         <header className="about-heading">
-          <span className="about-kicker">// whoami</span>
+          <span className="about-kicker"><Icon name="user" /> // whoami</span>
           <h2>About Me</h2>
           <h3>My Featured Work</h3>
           <p>Full-stack developer, API engineer &amp; platform host building real-world systems.</p>
@@ -37,14 +32,26 @@ export default function About() {
       </Reveal>
 
       <div className="about-layout">
+        <Reveal className="about-photo-cell">
+          <figure className="about-photo">
+            <img
+              src="/projects/admin-platform.png"
+              alt={`${alias} platform preview`}
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+        </Reveal>
+
         <Reveal>
           <article className="panel about-story">
             <span className="about-alias">({alias})</span>
-            <h3>I'm a full-stack web developer focused on building functional, production-ready systems.</h3>
+            <h3>Introduce Myself</h3>
             <p>
-              Including APIs, dashboards, authentication flows, and real data-driven applications. I don't just
-              design interfaces; I build the logic behind them, connect databases, secure user access, and make
-              sure applications actually run reliably in the real world.
+              I'm a web developer focused on building functional, production-ready systems —
+              including APIs, dashboards, authentication flows, and real data-driven applications. I don't
+              just design interfaces; I build the logic behind them, connect databases, secure user access,
+              and make sure applications actually run reliably in the real world.
             </p>
             <p>
               I also host the platforms I build. That means the API, the server, the domain, SSL and the deployment
@@ -57,40 +64,26 @@ export default function About() {
             </p>
           </article>
         </Reveal>
-
-        <Reveal>
-          <aside className="panel about-services">
-            <div className="about-services-head">
-              <span>What I build</span>
-              <span>{String(capabilities.length).padStart(2, '0')} services</span>
-            </div>
-            <ul>
-              {capabilities.map(capability => (
-                <li key={capability}>
-                  <span className="service-check" aria-hidden="true">✓</span>
-                  <span>{capability}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="#contact" className="btn btn-primary about-hire">
-              <span className="btn-caret">→</span> Hire Me
-            </a>
-          </aside>
-        </Reveal>
       </div>
 
       <Reveal>
-        <div className="work-strip">
-          <span className="work-strip-label">Selected work</span>
-          <div className="work-strip-grid">
-            {workPreview.map(item => (
-              <a key={item.id} className="work-tile" href="#projects">
-                <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
-                <span>{item.name}</span>
-              </a>
-            ))}
+        <aside className="panel about-services about-services-block">
+          <div className="about-services-head">
+            <span>What I build</span>
+            <span>{String(capabilities.length).padStart(2, '0')} services</span>
           </div>
-        </div>
+          <ul>
+            {capabilities.map(capability => (
+              <li key={capability}>
+                <span className="service-check" aria-hidden="true"><Icon name="check" /></span>
+                <span>{capability}</span>
+              </li>
+            ))}
+          </ul>
+          <a href="#contact" className="btn btn-primary about-hire">
+            <span className="btn-caret">→</span> Hire Me
+          </a>
+        </aside>
       </Reveal>
     </section>
   )

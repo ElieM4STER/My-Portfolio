@@ -42,7 +42,7 @@ const formatCategory = value => String(value || 'article')
   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
   .join('-')
 
-const articleHref = slug => `?post=${encodeURIComponent(slug)}#post-${slug}`
+const articleHref = slug => `?post=${encodeURIComponent(slug)}`
 
 export default function Blog() {
   const { data: posts } = usePortfolioData('posts', fallbackPosts)
@@ -72,9 +72,9 @@ export default function Blog() {
   }, [activePost, activeSlug])
 
   useEffect(() => {
-    const targetId = window.location.hash.slice(1) || (activeSlug ? `post-${activeSlug}` : 'blog')
+    if (!activeSlug) return undefined
     const frame = requestAnimationFrame(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      document.getElementById(`post-${activeSlug}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
     return () => cancelAnimationFrame(frame)
   }, [activeSlug, activePost])
@@ -83,7 +83,6 @@ export default function Blog() {
     event.preventDefault()
     const url = new URL(window.location.href)
     url.searchParams.set('post', slug)
-    url.hash = `post-${slug}`
     window.history.pushState({ post: slug }, '', url)
     setActiveSlug(slug)
   }
@@ -92,19 +91,18 @@ export default function Blog() {
     event.preventDefault()
     const url = new URL(window.location.href)
     url.searchParams.delete('post')
-    url.hash = 'blog'
     window.history.replaceState({}, '', url)
     setActiveSlug(null)
   }
 
   return (
     <section className="section" id="blog">
-        <SectionHead tag="Writeups & articles" title="Technical notes," accent="CTF & dev insights" />
+        <SectionHead tag="Writeups & articles" title="Technical notes," accent="CTF & dev insights" icon="terminal" />
 
       <Reveal>
         <div className="blog-intro">
           <p>Technical writeups, CTF solutions, and dev insights from building and securing real products.</p>
-          <span className="blog-note-count">Development Â· Security Â· Process</span>
+          <span className="blog-note-count">Development · Security · Process</span>
         </div>
       </Reveal>
 
@@ -114,7 +112,7 @@ export default function Blog() {
           id={`post-${activeSlug}`}
           aria-labelledby={`post-title-${activeSlug}`}
         >
-          <a className="post-back" href="#blog" onClick={closeArticle}>â† Back to all articles</a>
+          <a className="post-back" href="#blog" onClick={closeArticle}>← Back to all articles</a>
 
           {activePost ? (
             <>
@@ -149,7 +147,7 @@ export default function Blog() {
                     </span>
                   ))}
                 </div>
-                <a href="#contact">Discuss this topic â†’</a>
+                <a href="#contact">Discuss this topic →</a>
               </footer>
             </>
           ) : (
@@ -225,7 +223,7 @@ export default function Blog() {
                     onClick={event => openArticle(event, post.slug)}
                     aria-label={`Read ${post.title}`}
                   >
-                    Read article <span aria-hidden="true">â†’</span>
+                    Read article <span aria-hidden="true">→</span>
                   </a>
                 </div>
               </article>

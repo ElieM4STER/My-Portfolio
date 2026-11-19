@@ -18,7 +18,7 @@ export default function Projects() {
       <Reveal>
         <header className="section-intro section-intro-plain">
           <div>
-            <span className="section-eyebrow">Projects</span>
+            <span className="section-eyebrow"><Icon name="rocket" /> Projects</span>
           </div>
           <p>Production-ready applications built from scratch.</p>
         </header>
@@ -26,7 +26,7 @@ export default function Projects() {
 
       {projects.length === 0 ? (
         <div className="blog-empty">
-          <span>âˆ…</span>
+          <span>∅</span>
           <p>No projects are available yet.</p>
         </div>
       ) : (
@@ -36,14 +36,15 @@ export default function Projects() {
             const wide = projects.length === 1
             const image = project.image_url
             const showImage = Boolean(image) && !brokenImages[project.id || project.name]
+            const contain = project.fit === 'contain'
             const whatsapp = String(project.whatsapp || '').replace(/\D/g, '')
             return (
               <Reveal key={project.id || project.name}>
                 <article className={`project-card${wide ? ' project-card-wide' : ''}`}>
-                  <div className={`project-visual${showImage ? ' has-image' : ''}`}>
+                  <div className={`project-visual${showImage ? ' has-image' : ''}${contain ? ' is-contain' : ''}`}>
                     {showImage ? (
                       <img
-                        className="project-image"
+                        className={`project-image${contain ? ' is-contain' : ''}`}
                         src={image}
                         alt={`${project.name} preview`}
                         loading="lazy"
@@ -76,21 +77,21 @@ export default function Projects() {
                     <div className="project-links">
                       {project.live_url && (
                         <a href={project.live_url} target="_blank" rel="noreferrer">
-                          <Icon name="external" /> View live <span>â†—</span>
+                          <Icon name="external" /> View live <span>↗</span>
                         </a>
                       )}
                       {project.source_url && (
                         <a href={project.source_url} target="_blank" rel="noreferrer">
-                          <Icon name="github" /> Source code <span>â†—</span>
+                          <Icon name="github" /> Source code <span>↗</span>
                         </a>
                       )}
                       {whatsapp && (
                         <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">
-                          <Icon name="whatsapp" /> WhatsApp <span>â†—</span>
+                          <Icon name="whatsapp" /> WhatsApp <span>↗</span>
                         </a>
                       )}
                       {!project.live_url && !project.source_url && !whatsapp && (
-                        <a href="#contact"><Icon name="chat" /> Discuss project <span>â†’</span></a>
+                        <a href="#contact"><Icon name="chat" /> Discuss project <span>→</span></a>
                       )}
                     </div>
                   </div>

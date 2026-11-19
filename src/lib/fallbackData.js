@@ -10,7 +10,7 @@ export const fallbackProfile = {
   email: 'byiringiroelie468@gmail.com',
   whatsapp: '0783547443',
   instagram: 'elie___001',
-  github: 'elie',
+  github: 'ElieM4STER',
   portfolio: 'elie.dev',
 }
 
@@ -103,7 +103,6 @@ export const fallbackProjects = [
     description:
       'Authentication, product management, cart & secure payments — REST API behind the storefront, deployed and hosted in production.',
     tags: ['React', 'Node.js', 'REST API', 'MongoDB'],
-    image_url: '/projects/ecommerce.jpg',
     whatsapp: '703756189701217',
   },
   {
@@ -112,7 +111,6 @@ export const fallbackProjects = [
     description:
       'Expert API integration for Dentrix — connecting external endpoints to the platform with authenticated requests, clear contracts, validation and error handling.',
     tags: ['API Integration', 'Dentrix', 'REST API', 'Node.js'],
-    image_url: '/projects/dentrix-api.jpg',
     whatsapp: '',
   },
   {
@@ -121,7 +119,14 @@ export const fallbackProjects = [
     description:
       'Managed cloud solutions and platform hosting: domain, DNS, SSL certificate, containerised build and CI/CD releases with automated backups and uptime monitoring.',
     tags: ['Hosting', 'Docker', 'CI/CD', 'SSL'],
-    image_url: '/projects/hosting-deployment.jpg',
+    whatsapp: '',
+  },
+  {
+    id: 4,
+    name: 'Admin Platform',
+    description:
+      'A private admin console for running the platform — authenticated inbox, live calls and recorded video messages streamed in real time.',
+    tags: ['React', 'WebRTC', 'Supabase', 'Realtime'],
     whatsapp: '',
   },
 ]

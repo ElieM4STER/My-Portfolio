@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Reveal from './Reveal'
 import Icon from './Icons'
+import RecordModal from './RecordModal'
+import CallModal from './CallModal'
 import { usePortfolioData } from '../lib/usePortfolioData'
+import { warmCallTransport } from '../lib/realtime'
 import { fallbackProfile } from '../lib/fallbackData'
 
 const EMPTY_FORM = { name: '', email: '', subject: '', message: '' }
@@ -10,12 +13,43 @@ export default function Contact() {
   const { data: profile } = usePortfolioData('profile', fallbackProfile)
   const [form, setForm] = useState(EMPTY_FORM)
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sentError, setSentError] = useState('')
+  const [connect, setConnect] = useState(null)
+  const connectRef = useRef(null)
+
+  // Warm the realtime socket as soon as the "Connect with Elie" panel is near
+  // the viewport, so opening the call modal skips the TCP+TLS handshake.
+  useEffect(() => {
+    const el = connectRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          warmCallTransport()
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '300px 0px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const email = profile?.email || 'byiringiroelie468@gmail.com'
   const whatsapp = String(profile?.whatsapp || '0783547443').replace(/\s/g, '')
   const instagram = String(profile?.instagram || 'elie___001').replace(/^@/, '')
-  const github = String(profile?.github || 'elie').replace(/^@/, '')
+  const github = String(profile?.github || 'ElieM4STER').replace(/^@/, '')
   const location = profile?.location || 'Kigali, Rwanda'
+
+  const phone = String(profile?.phone || whatsapp).replace(/\s/g, '')
+  const toDial = value => {
+    const digits = String(value).replace(/\D/g, '')
+    if (!digits) return ''
+    if (digits.length === 10 && digits.startsWith('0')) return `+250${digits.slice(1)}`
+    return digits.startsWith('+') ? digits : `+${digits}`
+  }
+  const telHref = `tel:${toDial(phone)}`
 
   const details = [
     { id: 'email', icon: 'mail', label: 'Email', value: email, href: `mailto:${email}` },
@@ -30,11 +64,41 @@ export default function Contact() {
     setSent(false)
   }
 
-  const submit = event => {
+  const submit = async event => {
     event.preventDefault()
-    const subject = form.subject.trim() || `Portfolio message from ${form.name || 'a visitor'}`
-    const body = `${form.message.trim()}\n\n— ${form.name || 'Visitor'}${form.email ? ` (${form.email})` : ''}`
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    if (sending) return
+    setSentError('')
+    setSending(true)
+    setSent(false)
+
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+    }
+
+    try {
+      const res = await fetch('/api/contact', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)})
+      if (res.ok) { setForm(EMPTY_FORM); setSent(true); setSending(false); return }
+    } catch(e) { /* ignore */ }
+
+    try {
+      const formData = new FormData()
+      formData.append('name', payload.name)
+      formData.append('email', payload.email)
+      formData.append('subject', payload.subject || 'Portfolio message from ' + (payload.name||'a visitor'))
+      formData.append('message', payload.message)
+      formData.append('_captcha', 'false')
+      formData.append('_template', 'table')
+      const fsRes = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(email), {method:'POST', headers:{'Accept':'application/json'}, body: formData})
+      if (fsRes.ok) { setForm(EMPTY_FORM); setSent(true); setSending(false); return }
+    } catch(e) { /* ignore */ }
+
+    setSending(false)
+    const subj = payload.subject || 'Portfolio message from ' + (payload.name||'a visitor')
+    const body = payload.message + '\n\n— ' + (payload.name||'Visitor') + (payload.email ? ' (' + payload.email + ')' : '')
+    window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body)
     setSent(true)
   }
 
@@ -43,7 +107,7 @@ export default function Contact() {
       <Reveal>
         <header className="section-intro">
           <div>
-            <span className="section-eyebrow">Contact</span>
+            <span className="section-eyebrow"><Icon name="mail" /> Contact</span>
             <h2>Let&rsquo;s Work Together</h2>
           </div>
           <p>Have an API to build or a platform to host? Get in touch.</p>
@@ -74,12 +138,33 @@ export default function Contact() {
             </ul>
 
             <div className="contact-actions">
+              <a href={telHref} className="btn btn-call">
+                <Icon name="phone" /> Call me <span>→</span>
+              </a>
               <a href={`mailto:${email}`} className="btn btn-dark">
                 <Icon name="mail" /> Email me <span>→</span>
               </a>
               <a href={`https://wa.me/${whatsapp}`} className="btn btn-light" target="_blank" rel="noreferrer">
                 <Icon name="whatsapp" /> WhatsApp <span>↗</span>
               </a>
+            </div>
+
+            <div
+              className="connect-live"
+              ref={connectRef}
+              onMouseEnter={warmCallTransport}
+              onFocus={warmCallTransport}
+            >
+              <span className="connect-title"><Icon name="video" /> Connect with Elie</span>
+              <p>Record a video message with your camera, or start a live call if he&rsquo;s online.</p>
+              <div className="connect-buttons">
+                <button type="button" className="btn btn-light" onClick={() => setConnect('record')}>
+                  <Icon name="record" /> Record a video
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setConnect('call')}>
+                  <Icon name="phone" /> Live video call
+                </button>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -134,13 +219,21 @@ export default function Contact() {
               ></textarea>
             </label>
 
-            <button className="btn btn-primary form-send" type="submit">
-              <Icon name="send" /> Send Message <span aria-hidden="true">→</span>
+            <button className="btn btn-primary form-send" type="submit" disabled={sending}>
+              <Icon name="send" /> {sending ? 'Sending…' : 'Send Message'} <span aria-hidden="true">→</span>
             </button>
-            {sent && <p className="form-note">Your email app should have opened with the message ready to send.</p>}
+            {sent && <p className="form-note">Thank you — your message has been sent.</p>}
+            {sentError && <p className="form-note">{sentError}</p>}
           </form>
         </Reveal>
       </div>
+
+      {connect === 'record' && (
+        <RecordModal onClose={() => setConnect(null)} onSwitchToCall={() => setConnect('call')} />
+      )}
+      {connect === 'call' && (
+        <CallModal onClose={() => setConnect(null)} onSwitchToRecord={() => setConnect('record')} />
+      )}
     </section>
   )
 }

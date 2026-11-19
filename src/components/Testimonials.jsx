@@ -1,4 +1,5 @@
 import Reveal from './Reveal'
+import Icon from './Icons'
 import { usePortfolioData } from '../lib/usePortfolioData'
 import { fallbackTestimonials } from '../lib/fallbackData'
 
@@ -6,7 +7,9 @@ function Stars({ rating = 5 }) {
   return (
     <span className="testimonial-stars" aria-label={`${rating} out of 5 stars`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index} className={index < rating ? 'star-on' : 'star-off'} aria-hidden="true">★</span>
+        <span key={index} className={index < rating ? 'star-on' : 'star-off'} aria-hidden="true">
+          <Icon name="star" />
+        </span>
       ))}
     </span>
   )
@@ -20,7 +23,7 @@ export default function Testimonials() {
       <Reveal>
         <header className="section-intro">
           <div>
-            <span className="section-eyebrow">Testimonials</span>
+            <span className="section-eyebrow"><Icon name="chat" /> Testimonials</span>
             <h2>What Clients Say</h2>
           </div>
           <p>Feedback from the people and teams I have worked with.</p>

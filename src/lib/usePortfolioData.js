@@ -12,7 +12,7 @@ export function usePortfolioData(table, fallbackData) {
     const load = async () => {
       setLoading(true)
       try {
-        const rows = await fetchRows(table)
+        const rows = await fetchRows(table, table === 'profile' ? null : 'sort_order')
         if (!cancelled && rows) setData(rows)
       } catch (err) {
         if (!cancelled) setError(err)

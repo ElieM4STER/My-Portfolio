@@ -36,5 +36,3 @@ export const socialLinks = [
     external: true,
   },
 ]
-
-export const socialLinkById = id => socialLinks.find(link => link.id === id) || null

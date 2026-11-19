@@ -67,12 +67,12 @@ export default function Skills() {
       <Reveal>
         <header className="section-intro">
           <div>
-            <span className="section-eyebrow">Skills &amp; tools</span>
+            <span className="section-eyebrow"><Icon name="code" /> Skills &amp; tools</span>
             <h2>The stack behind the work.</h2>
           </div>
           <p>
             A practical toolkit for building responsive interfaces, reliable APIs, secure data flows, and the
-            servers that keep them online â€” deployment, domains, SSL and monitoring included.
+            servers that keep them online — deployment, domains, SSL and monitoring included.
           </p>
         </header>
       </Reveal>

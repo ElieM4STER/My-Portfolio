@@ -21,6 +21,16 @@ const BRAND_BG = {
   monitor: '#3a7bd5',
   server: '#6b7280',
   design: '#9333ea',
+  pen: '#c4514a',
+  dentist: '#22b8cf',
+  ecommerce: '#f59f00',
+  hosting: '#0ea5a4',
+  accessibility: '#1572b6',
+  performance: '#16a34a',
+  learning: '#9333ea',
+  architecture: '#3b82f6',
+  backup: '#64748b',
+  network: '#0ea5e9',
 }
 
 // Order matters: the first match wins, so more specific patterns come first.

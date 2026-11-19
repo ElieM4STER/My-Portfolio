@@ -124,7 +124,7 @@ values (
   'byiringiroelie468@gmail.com',
   '0783547443',
   'elie___001',
-  'elie',
+  'ElieM4STER',
   array['Full-Stack Developer', 'Cybersecurity Analyst', 'API Architect']
 )
 on conflict do nothing;
@@ -322,6 +322,7 @@ alter table public.profile enable row level security;
 alter table public.stats enable row level security;
 alter table public.focus enable row level security;
 alter table public.experience enable row level security;
+alter table public.testimonials enable row level security;
 alter table public.skills enable row level security;
 alter table public.projects enable row level security;
 alter table public.posts enable row level security;
@@ -334,3 +335,83 @@ begin
     execute format('create policy "public read %s" on public.%I for select using (true);', t, t);
   end loop;
 end $$;
+
+-- =============================================================
+-- Video messages: visitors record with their camera, the admin
+-- (api/admin.js, service role) is the only reader.
+-- =============================================================
+
+create table if not exists public.recordings (
+  id uuid primary key default gen_random_uuid(),
+  name text default '',
+  email text default '',
+  message text default '',
+  path text not null,
+  mime text default 'video/webm',
+  duration integer default 0,
+  size bigint default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table public.recordings enable row level security;
+
+-- Visitors may submit, but the anon key can never read or delete rows.
+drop policy if exists "public insert recordings" on public.recordings;
+create policy "public insert recordings" on public.recordings
+  for insert to anon, authenticated
+  with check (true);
+
+-- Private bucket: uploads allowed, reads only via the service role.
+insert into storage.buckets (id, name, public)
+values ('recordings', 'recordings', false)
+on conflict (id) do nothing;
+
+drop policy if exists "public upload recordings" on storage.objects;
+create policy "public upload recordings" on storage.objects
+  for insert to anon, authenticated
+  with check (bucket_id = 'recordings');
+
+-- =============================================================
+-- Contact messages: visitors submit via api/contact.js, only the
+-- admin (api/admin.js, service role) can read, mark read or delete.
+-- =============================================================
+
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null default '',
+  email text default '',
+  subject text default '',
+  message text not null default '',
+  read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.messages enable row level security;
+
+drop policy if exists "public insert messages" on public.messages;
+create policy "public insert messages" on public.messages
+  for insert to anon, authenticated
+  with check (true);
+
+-- =============================================================
+-- Visits: lightweight analytics recorded by api/visits.js.
+-- Only the admin (service role) can read them.
+-- =============================================================
+
+create table if not exists public.visits (
+  id uuid primary key default gen_random_uuid(),
+  visitor text not null default '',
+  path text not null default '/',
+  referrer text default '',
+  created_at timestamptz not null default now()
+);
+
+alter table public.visits enable row level security;
+
+create index if not exists visits_visitor_idx on public.visits (visitor);
+create index if not exists visits_created_at_idx on public.visits (created_at);
+
+drop policy if exists "public insert visits" on public.visits;
+create policy "public insert visits" on public.visits
+  for insert to anon, authenticated
+  with check (true);

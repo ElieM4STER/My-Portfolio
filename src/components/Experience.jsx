@@ -30,7 +30,7 @@ export default function Experience() {
       <Reveal>
         <header className="section-intro">
           <div>
-            <span className="section-eyebrow">Experience</span>
+            <span className="section-eyebrow"><Icon name="briefcase" /> Experience</span>
             <h2>Work Timeline</h2>
           </div>
           <p>My professional journey so far.</p>

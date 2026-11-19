@@ -1,20 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CountUp from './CountUp'
 import Reveal from './Reveal'
 import Icon from './Icons'
 import { usePortfolioData } from '../lib/usePortfolioData'
-import { fallbackProfile } from '../lib/fallbackData'
+import { fallbackProfile, fallbackSkills, fallbackTestimonials } from '../lib/fallbackData'
 
-const ROLES = [
-  ['Full-Stack Developer'],
-  ['Cybersecurity'],
-  ['API'],
-]
+const ROLES = ['Full-Stack Developer', 'Cybersecurity Analyst', 'API Architect', 'Platform Hosting']
 
-const ROLE_ICONS = {
-  'Full-Stack Developer': 'code',
-  Cybersecurity: 'shield',
-  API: 'api',
+const getRoleIcon = word => {
+  const value = String(word).toLowerCase()
+  if (value.includes('cyber') || value.includes('security')) return 'shield'
+  if (value.includes('api')) return 'api'
+  if (value.includes('host') || value.includes('deploy') || value.includes('cloud') || value.includes('server')) return 'host'
+  if (value.includes('full') || value.includes('stack') || value.includes('developer')) return 'laptop'
+  if (value.includes('frontend') || value.includes('design')) return 'brush'
+  if (value.includes('data') || value.includes('database')) return 'database'
+  if (value.includes('devops') || value.includes('ci/cd') || value.includes('pipeline')) return 'cogs'
+  return 'code'
 }
 
 const PROFILE_STATS = [
@@ -22,26 +24,67 @@ const PROFILE_STATS = [
   { id: 'projects', value: 6, label: 'Projects' },
   { id: 'pagespeed', value: 95, label: 'PageSpeed' },
   { id: 'kchats', value: 238, label: 'K-Chart' },
+  { id: 'reviews', value: 3, suffix: '★', label: 'Reviews' },
+  { id: 'skills', value: 12, suffix: '+', label: 'Skills' },
 ]
 
-const GITHUB_URL = 'https://github.com/elie'
+const GITHUB_URL = 'https://github.com/ElieM4STER'
 
-const ROLE_TOKENS = ROLES.map(role => {
-  const phrase = role.join(' ')
-  return { word: phrase, key: phrase }
-})
+function RoleList({ roles }) {
+  const [reduced] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [index, setIndex] = useState(0)
+  const [text, setText] = useState('')
 
-function RoleList() {
+  useEffect(() => {
+    if (reduced) return undefined
+    const word = roles[index] || roles[0]
+    if (!word) return undefined
+
+    let cancelled = false
+    let chars = 0
+    let deleting = false
+    let timer
+
+    const step = () => {
+      if (cancelled) return
+      if (deleting) {
+        chars -= 1
+        setText(word.slice(0, Math.max(chars, 0)))
+        if (chars <= 0) {
+          setIndex(i => (i + 1) % roles.length)
+          return
+        }
+        timer = setTimeout(step, 28)
+      } else {
+        chars += 1
+        setText(word.slice(0, chars))
+        if (chars >= word.length) {
+          deleting = true
+          timer = setTimeout(step, 1900)
+          return
+        }
+        timer = setTimeout(step, 65)
+      }
+    }
+
+    timer = setTimeout(step, 400)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [index, roles, reduced])
+
+  const icon = getRoleIcon(roles[index] || roles[0])
+  const display = reduced ? roles.join('  •  ') : text
+
   return (
-    <div className="role-list" aria-label="Professional roles">
-      <span className="role-line">
-        {ROLE_TOKENS.map((token, index) => (
-          <span className="role-word" key={token.key}>
-            <Icon name={ROLE_ICONS[token.word]} className="role-word-icon" />
-            <span className="role-word-typed">{token.word}</span>
-            {index < ROLE_TOKENS.length - 1 ? ', ' : null}
-          </span>
-        ))}
+    <div className="role-list" aria-label={`Professional roles: ${roles.join(', ')}`}>
+      <span className="role-line" aria-hidden="true">
+        <span className="role-word" key={index}>
+          <Icon name={icon} className="role-word-icon" />
+          <span className="role-word-typed">{display}</span>
+        </span>
+        <span className="role-caret">▌</span>
       </span>
     </div>
   )
@@ -52,7 +95,20 @@ export default function Hero() {
   const initials = name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase()
   const [photoOk, setPhotoOk] = useState(true)
   const { data: profile } = usePortfolioData('profile', fallbackProfile)
+  const { data: skills } = usePortfolioData('skills', fallbackSkills)
+  const { data: testimonials } = usePortfolioData('testimonials', fallbackTestimonials)
+  const roles = Array.isArray(profile?.roles) && profile.roles.length ? profile.roles : ROLES
   const githubUrl = profile?.github ? `https://github.com/${profile.github}` : GITHUB_URL
+
+  const stats = PROFILE_STATS.map(stat => {
+    if (stat.id === 'reviews' && Array.isArray(testimonials) && testimonials.length) {
+      return { ...stat, value: testimonials.length }
+    }
+    if (stat.id === 'skills' && Array.isArray(skills) && skills.length) {
+      return { ...stat, value: skills.length }
+    }
+    return stat
+  })
 
   return (
     <section className="hero" id="home">
@@ -66,7 +122,7 @@ export default function Hero() {
             <h1 className="name">{name}</h1>
             <span className="hero-alias">(M4STER)</span>
           </div>
-          <RoleList />
+          <RoleList roles={roles} />
           <p className="hero-description">
             I build and host production platforms — secure APIs, authenticated dashboards, reliable databases
             and deployments that stay online. Need an API built, a platform hosted, or both? Let&rsquo;s talk.
@@ -111,12 +167,13 @@ export default function Hero() {
                 ) : (
                   <span className="profile-fallback">{initials}</span>
                 )}
+                <span className="profile-sparkle" aria-hidden="true" />
               </div>
             </div>
           </Reveal>
 
           <Reveal className="profile-stats">
-            {PROFILE_STATS.map(stat => (
+            {stats.map(stat => (
               <div className={`profile-stat${stat.tone ? ` profile-stat-${stat.tone}` : ''}`} key={stat.id}>
                 <strong><CountUp end={stat.value} suffix={stat.suffix} /></strong>
                 <span>{stat.label}</span>
@@ -132,8 +189,8 @@ export default function Hero() {
             >
               <span className="profile-chat-avatar">M</span>
               <span className="profile-chat-copy">
-                <strong>Ask elie-bot</strong>
-                <small>Chat about my work, skills or projects</small>
+                <strong>Chat Elie Bot</strong>
+                <small>Ask anything, or chat about my work</small>
               </span>
               <span className="profile-chat-arrow" aria-hidden="true">→</span>
             </button>
@@ -141,7 +198,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <a href="#about" className="scroll-cue" aria-label="Scroll to about section">
+      <a href="#about" className="scroll-cue" aria-label="Go to the about section">
         <span>SCROLL</span>
         <span className="cue-line"></span>
       </a>

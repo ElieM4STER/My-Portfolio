@@ -5,24 +5,23 @@ const SERVICES = [
   {
     id: 'api',
     icon: 'api',
+    tone: 'var(--ic-skills)',
     title: 'API Development',
     text: 'REST and GraphQL APIs with predictable contracts, validation, authentication and rate limits — documented so any frontend can consume them.',
     points: ['REST & GraphQL', 'Auth & rate limits', 'API documentation'],
-    media: '/projects/dentrix-api.jpg',
-    mediaAlt: 'Expert Dentrix API Integration Service branding',
   },
   {
     id: 'hosting',
     icon: 'host',
+    tone: 'var(--ic-built-with)',
     title: 'Platform Hosting',
     text: 'Full-stack platforms hosted on Linux VPS with process management, logging and a real live URL — not just a project that runs on one laptop.',
     points: ['Linux VPS', 'Process & logs', 'Live production URL'],
-    media: '/projects/hosting-deployment.jpg',
-    mediaAlt: 'Managed IT cloud solutions',
   },
   {
     id: 'deployment',
     icon: 'deploy',
+    tone: 'var(--ic-projects)',
     title: 'Deployment & CI/CD',
     text: 'Domain, DNS and SSL wired up, plus a repeatable deploy pipeline so every release is a push instead of a manual ritual.',
     points: ['Domains, DNS & SSL', 'Automated builds', 'Rollbacks'],
@@ -30,6 +29,7 @@ const SERVICES = [
   {
     id: 'monitoring',
     icon: 'monitor',
+    tone: 'var(--ic-home)',
     title: 'Maintenance & Monitoring',
     text: 'Uptime checks, backups and patching after launch, so your API and platform keep serving when clients are using them.',
     points: ['Uptime monitoring', 'Backups', 'Updates & patches'],
@@ -37,6 +37,7 @@ const SERVICES = [
   {
     id: 'security',
     icon: 'shield',
+    tone: 'var(--ic-blog)',
     title: 'API Security',
     text: 'Security-first engineering: hardened endpoints, access control and penetration testing informed by a cybersecurity background.',
     points: ['Hardened endpoints', 'Pen testing', 'Access control'],
@@ -44,6 +45,7 @@ const SERVICES = [
   {
     id: 'data',
     icon: 'database',
+    tone: 'var(--ic-services)',
     title: 'Databases & Performance',
     text: 'Schema design, indexing and query tuning so the API answers fast and the platform stays responsive under real traffic.',
     points: ['Schema design', 'Indexing', 'Query tuning'],
@@ -56,7 +58,7 @@ export default function Services() {
       <Reveal>
         <header className="section-intro">
           <div>
-            <span className="section-eyebrow">Services</span>
+            <span className="section-eyebrow"><Icon name="cogs" /> Services</span>
             <h2>Build it, then host it.</h2>
           </div>
           <p>
@@ -70,13 +72,8 @@ export default function Services() {
         {SERVICES.map((service, index) => (
           <Reveal key={service.id}>
             <article className="service-card">
-              {service.media && (
-                <div className="service-media">
-                  <img src={service.media} alt={service.mediaAlt} loading="lazy" decoding="async" />
-                </div>
-              )}
               <div className="service-card-top">
-                <span className="service-icon" aria-hidden="true"><Icon name={service.icon} /></span>
+                <span className="service-icon" style={{ '--tone': service.tone }} aria-hidden="true"><Icon name={service.icon} /></span>
                 <span className="service-index">{String(index + 1).padStart(2, '0')}</span>
               </div>
               <h3>{service.title}</h3>
@@ -84,7 +81,7 @@ export default function Services() {
               <ul className="service-points">
                 {service.points.map(point => (
                   <li key={point}>
-                    <span className="service-check" aria-hidden="true">✓</span>
+                    <span className="service-check" aria-hidden="true"><Icon name="check" /></span>
                     <span>{point}</span>
                   </li>
                 ))}
